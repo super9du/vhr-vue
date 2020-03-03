@@ -4,14 +4,14 @@ import router from '../router/index';
 
 
 //拦截器：对状态码进行响应
-axios.interceptors.response.use(success => {
-    if (success.status && success.status === 200 && success.data.status === 500) {
-        Message.error({showClose: true, message: success.data.msg});
+axios.interceptors.response.use(resp => {
+    if (resp.status && resp.status === 200 && resp.data.status === 500) {
+        Message.error({showClose: true, message: resp.data.msg});
         return;
-    } else if (success.data.msg) {
-        Message.success({showClose: true, message: success.data.msg});
+    } else if (resp.data.msg) {
+        Message.success({showClose: true, message: resp.data.msg});
     }
-    return success.data;
+    return resp.data;
 }, error => {
     if (error.response.status === 401) {
         Message.error({showClose: true, message: '请登录后操作'});
