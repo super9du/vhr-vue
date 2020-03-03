@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {Message} from 'element-ui';
+import router from '../router/index';
 
 
 //拦截器：对状态码进行响应
@@ -8,15 +9,17 @@ axios.interceptors.response.use(success => {
         Message.error({showClose: true, message: success.data.msg});
         return;
     } else if (success.data.msg) {
-        Message.info({showClose: true, message: success.data.msg});
+        Message.success({showClose: true, message: success.data.msg});
     }
     return success.data;
 }, error => {
-    if (error.status === 401) {
+    if (error.response.status === 401) {
         Message.error({showClose: true, message: '请登录后操作'});
-    } else if (error.status === 403) {
-        Message.error({showClose: true, message: '权限不足'});
-    } else if (error.status === 404 || error.status === 500) {
+        router.replace('/');
+    } else if (error.response.status === 403) {
+        Message.error({showClose: true, message: '权限不足，请尝试重新登录'});
+        router.replace('/');
+    } else if (error.response.status === 404 || error.response.status === 500) {
         Message.error({showClose: true, message: '服务器bug了'});
     } else {
         if (error.response.data.msg) {

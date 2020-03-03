@@ -1,20 +1,34 @@
 <template>
     <el-container>
+        <!---------------------
+         |       顶栏        |
+        ---------------------->
         <el-header class="header">
             <div>微人事</div>
-            <el-dropdown @command="commandHandler">
-                <span class="user">
-                    <img class="userface" :src="user.userface" alt="">{{user.name}}
-                    <i class="el-icon-arrow-down el-icon--right"></i>
-                </span>
-                <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="my">个人中心</el-dropdown-item>
-                    <el-dropdown-item command="setting">设置</el-dropdown-item>
-                    <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
-                </el-dropdown-menu>
-            </el-dropdown>
+            <div class="header--right">
+                <el-button class="el-button--text" type="text"
+                           :disabled="$route.path==='/chatRoom'"
+                           @click="handleChatClick">
+                    <el-badge :value="msgDot" :max="99"><i class="el-icon-chat-line-round"></i></el-badge>
+                </el-button>
+                <el-dropdown @command="commandHandler">
+                    <span class="user">
+                        <img class="userface" :src="user.userface" alt="">{{user.name}}
+                        <i class="el-icon-arrow-down el-icon--right"></i>
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item command="my">个人中心</el-dropdown-item>
+                        <el-dropdown-item command="setting">设置</el-dropdown-item>
+                        <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                    </el-dropdown-menu>
+                </el-dropdown>
+            </div>
         </el-header>
+
         <el-container>
+            <!---------------------
+             |     左侧菜单      |
+            ---------------------->
             <el-aside class="aside" width="200px">
                 <el-menu router unique-opened v-for="(item, index) in this.$router.options.routes" :key="index+10">
                     <el-submenu :index="index.toString()" v-if="!item.hidden">
@@ -39,14 +53,18 @@
                     </el-submenu>
                 </el-menu>
             </el-aside>
-            <el-main>
-                <el-breadcrumb separator="/" v-if="this.$router.currentRoute.path!=='/home'">
+            <!---------------------
+             |     主要内容页     |
+            ---------------------->
+            <el-main class="el-main">
+                <el-breadcrumb class="breadcrumb" separator="/" v-if="this.$router.currentRoute.path!=='/home'">
                     <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-                    <el-breadcrumb-item><a href="/">活动管理</a></el-breadcrumb-item>
-                    <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-                    <el-breadcrumb-item>活动详情</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{this.$router.currentRoute.name}}</el-breadcrumb-item>
                 </el-breadcrumb>
                 <div v-else>微人事首页</div>
+                <!---------------------
+                 |      子 页 面      |
+                ---------------------->
                 <router-view/>
             </el-main>
         </el-container>
@@ -55,6 +73,7 @@
 
 <script>
     import {getRequest} from "../utils/api";
+    import {mapState} from 'vuex'
 
     export default {
         name: "Home",
@@ -63,6 +82,14 @@
                 user: JSON.parse(window.sessionStorage.getItem('user')),
                 opens: []
             }
+        },
+        computed: {
+            routes() {
+                return this.$store.state.routes;
+            },
+            ...mapState([
+                'msgDot'
+            ])
         },
         methods: {
             commandHandler(cmd) {
@@ -75,7 +102,7 @@
                     }).then(() => {
                         getRequest('/logout');
                         window.sessionStorage.removeItem('user');
-                        _this.$store.state.commit('initMenu', []);
+                        _this.$store.commit('initMenu', []);
                         _this.$router.replace('/');
                     }).catch(() => {
                         _this.$message({
@@ -84,11 +111,9 @@
                         });
                     });
                 }
-            }
-        },
-        computed: {
-            routes() {
-                return this.$store.state.routes;
+            },
+            handleChatClick() {
+                this.$router.push('/chatRoom');
             }
         }
     }
@@ -101,6 +126,22 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+    }
+
+    .header--right {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .el-button--text {
+        color: #ccc !important;
+        font-size: 2em !important;;
+        margin-right: 15px !important;;
+    }
+
+    .el-button--text:hover {
+        color: #eee !important;;
     }
 
     .user {
@@ -120,5 +161,13 @@
 
     .aside {
         height: 100%;
+    }
+
+    .el-main {
+        text-align: left;
+    }
+
+    .breadcrumb {
+        padding: 0 0 15px 0;
     }
 </style>

@@ -43,7 +43,11 @@
                         postKvRequest('doLogin', this.loginForm).then(resp => {
                             if (resp) {
                                 window.sessionStorage.setItem('user', JSON.stringify(resp.obj));
-                                this.$router.replace('/home');
+                                let path = this.$route.query.redirect;
+                                this.$router.replace((path === '/' || path === undefined) ? '/home' : path);
+
+                                this.$store.commit('INIT_CURRENT_HR', JSON.parse(window.sessionStorage.getItem('user')));
+                                this.$store.dispatch('connect');
                             }
                         });
                     } else {
